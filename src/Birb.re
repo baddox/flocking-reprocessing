@@ -23,12 +23,21 @@ let random = env => {
   create(body);
 };
 
-let drawBirb = (env, birb) => {
+let isNeighbor = (a, b) =>
+  a !== b && Vector.distance(a.body.pos, b.body.pos) < 100.0;
+
+let draw = (birb, ~hovered=false, ~selected=false, ~neighbor=false, env) => {
   Draw.pushMatrix(env);
   Draw.translate(~x=birb.body.pos.x, ~y=birb.body.pos.y, env);
-  /* Draw.rotate(Vector.heading(birb.body.vel) -. Constants.half_pi, env); */
   Draw.rotate(-. Vector.heading(birb.body.vel) +. Constants.pi, env);
+  /* Draw.scale(~x=2.0, ~y=2.0, env); */
   /* Draw.pixelf(~pos=(0.0, 0.0), ~color=Constants.white, env); */
+  if (selected) {
+    Draw.fill(Constants.white, env);
+  };
+  if (neighbor) {
+    Draw.stroke(Constants.green, env);
+  };
   Draw.trianglef(
     ~p1=(0.0, (-5.0)),
     ~p2=(3.0, 5.0),
