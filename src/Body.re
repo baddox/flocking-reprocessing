@@ -20,7 +20,7 @@ let create =
 let update = body => {
   let pos = Vector.add(body.pos, body.vel);
   let vel = Vector.add(body.vel, body.acc);
-  {...body, pos, vel};
+  {pos, vel, acc: Vector.create(0.0, 0.0)};
 };
 
 let addForce = (force, body) => {...body, acc: Vector.add(body.acc, force)};

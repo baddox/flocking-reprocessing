@@ -17,6 +17,8 @@ let fromPolar = (distance, angle) : t => {
 
 let add = (a: t, b: t) : t => create(a.x +. b.x, a.y +. b.y);
 
+let sub = (a: t, b: t) : t => create(a.x -. b.x, a.y -. b.y);
+
 let mult = (n: float, vec: t) : t => create(vec.x *. n, vec.y *. n);
 
 let div = (n: float, vec: t) : t => create(vec.x /. n, vec.y /. n);

@@ -12,7 +12,7 @@ let updatePoint = (env, point) =>
 
 let setup = env => {
   Env.size(~width=600, ~height=600, env);
-  let birbs = Array.init(100, _i => Birb.random(env));
+  let birbs = Array.init(200, _i => Birb.random(env));
   {birbs, selectedBirbIndex: Some(0)};
 };
 
@@ -33,7 +33,10 @@ let draw = (state, env) => {
     Birb.drawCircle(env, birb);
   | None => ()
   };
-  {...state, birbs: state.birbs |> Array.map(Birb.update(env))};
+  {
+    ...state,
+    birbs: state.birbs |> Array.map(Birb.update(state.birbs, env)),
+  };
 };
 
 run(~setup, ~draw, ());
