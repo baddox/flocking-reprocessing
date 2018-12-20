@@ -60,6 +60,17 @@ let wrap = (env, vector) => {
   fromCoords(Util.wrap(vector.x, width), Util.wrap(vector.y, height));
 };
 
+let average = vectors => {
+  let length = List.length(vectors);
+  switch (length) {
+  | 0 => create(0.0, 0.0)
+  | _ =>
+    let sum = vectors |> List.fold_left(add, create(0.0, 0.0));
+    let average = div(float_of_int(length), sum);
+    average;
+  };
+};
+
 let random = (xMin, xMax, yMin, yMax) => {
   let x = Util.random(xMin, xMax);
   let y = Util.random(yMin, yMax);

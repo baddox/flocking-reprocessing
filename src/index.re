@@ -1,5 +1,7 @@
 open Reprocessing;
 
+let birbCount = 300;
+
 type stateT = {
   birbs: array(Birb.t),
   selectedBirbIndex: option(int),
@@ -12,7 +14,7 @@ let updatePoint = (env, point) =>
 
 let setup = env => {
   Env.size(~width=600, ~height=600, env);
-  let birbs = Array.init(200, _i => Birb.random(env));
+  let birbs = Array.init(birbCount, _i => Birb.random(env));
   {birbs, selectedBirbIndex: Some(0)};
 };
 

@@ -19,7 +19,7 @@ let random = env => {
 };
 
 let isNeighbor = (a, b) =>
-  a !== b && Vector.distance(a.body.pos, b.body.pos) < 50.0;
+  a !== b && Vector.distance(a.body.pos, b.body.pos) < 100.0;
 
 let averageHeading = birbs => {
   let headings =
@@ -43,12 +43,13 @@ let averagePosition = birbs => {
 
 let update = (birbs, env, birb) => {
   let neighbors = birbs |> Array.to_list |> List.filter(isNeighbor(birb));
-  let headingForce = Vector.fromPolar(0.1, averageHeading(birbs));
-  let positionForce = Vector.sub(averagePosition(birbs), birb.body.pos);
+  let averageVel =
+    neighbors |> List.map(birb => birb.body.vel) |> Vector.average;
+  let steering =
+    averageVel |> Vector.sub(birb.body.vel) |> Vector.setMag(1.0);
   let body =
     birb.body
-    |> Body.addForce(headingForce)
-    |> Body.addForce(positionForce)
+    |> Body.addForce(steering)
     |> Body.update
     |> Body.limitVel(1.0)
     |> Body.wrap(env);
