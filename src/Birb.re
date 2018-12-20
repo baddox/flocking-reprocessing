@@ -1,6 +1,6 @@
 open Reprocessing;
 
-let speed = 2.0;
+let speed = 1.0;
 
 let neighborDistance = 100.0;
 
@@ -25,30 +25,12 @@ let random = env => {
 let isNeighbor = (a, b) =>
   a !== b && Vector.distance(a.body.pos, b.body.pos) < neighborDistance;
 
-let averageHeading = birbs => {
-  let headings =
-    birbs
-    |> Array.map(birb => birb.body.vel |> Vector.heading)
-    |> Array.to_list;
-  let average =
-    (headings |> List.fold_left((+.), 0.0))
-    /. (List.length(headings) |> float_of_int);
-  average;
-};
-
-let averagePosition = birbs => {
-  let positions = birbs |> Array.map(birb => birb.body.pos) |> Array.to_list;
-  let average =
-    positions
-    |> List.fold_left(Vector.add, Vector.create(0.0, 0.0))
-    |> Vector.div(List.length(positions) |> float_of_int);
-  average;
-};
-
 let getAlignment = (birb, neighbors) => {
   let averageVel =
     neighbors |> List.map(neighbor => neighbor.body.vel) |> Vector.average;
-  let steering = averageVel |> Vector.sub(birb.body.vel);
+  let steering =
+    averageVel |> Vector.setMag(1.0) |> Vector.sub(birb.body.vel);
+  /* |> Vector.setMag(1.0); */
   steering;
 };
 
@@ -58,13 +40,12 @@ let getSeparation = (birb, neighbors) => {
     |> List.map(neighbor => {
          let awayFromNeighbor =
            birb.body.pos |> Vector.sub(neighbor.body.pos);
-         let desiredVel = awayFromNeighbor;
+         let desiredVel = awayFromNeighbor |> Vector.limit(1.0);
          let steering = desiredVel |> Vector.sub(birb.body.vel);
-         let distance =
-           Vector.distance(birb.body.pos, neighbor.body.pos) +. 0.0;
+         let distance = Vector.distance(birb.body.pos, neighbor.body.pos);
          /* https://www.wolframalpha.com/input/?i=exponential+fit+%5B(0,+1),+(10,+0.5),+(50,+0)%5D */
-         let magnitude = 2.71828 ** ((-0.0712898) *. distance);
-         let magnitude = 1.0;
+         /* let magnitude = 2.71828 ** ((-0.0656449) *. distance); */
+         let magnitude = 1.0 -. 0.01 *. distance;
          steering |> Vector.setMag(magnitude);
        })
     |> Vector.average;
@@ -74,8 +55,10 @@ let getSeparation = (birb, neighbors) => {
 let getCohesion = (birb, neighbors) => {
   let averagePos =
     neighbors |> List.map(neighbor => neighbor.body.pos) |> Vector.average;
-  let toAveragePos = averagePos |> Vector.sub(birb.body.pos);
-  let steering = toAveragePos |> Vector.sub(birb.body.vel);
+  let toAveragePos =
+    averagePos |> Vector.sub(birb.body.pos) |> Vector.setMag(1.0);
+  let steering =
+    toAveragePos |> Vector.sub(birb.body.vel) |> Vector.limit(1.0);
   steering;
 };
 
@@ -84,13 +67,14 @@ let update = (birbs, env, birb) => {
   let alignment = getAlignment(birb, neighbors);
   let separation = getSeparation(birb, neighbors);
   let cohesion = getCohesion(birb, neighbors);
-  /* Separation */
-  /* Force */
   let force =
     Vector.average([
-      alignment |> Vector.limitMag(speed *. 3.0),
-      separation |> Vector.limitMag(speed *. 1.0),
-      cohesion |> Vector.limitMag(speed *. 0.75),
+      /* alignment |> Vector.setMag(speed *. 1.0),
+         separation |> Vector.setMag(speed *. 1.0),
+         cohesion |> Vector.setMag(speed *. 1.0), */
+      alignment,
+      separation,
+      cohesion,
     ]);
   let body =
     birb.body

@@ -8,7 +8,7 @@ type stateT = {
 };
 
 let setup = env => {
-  Env.size(~width=600, ~height=600, env);
+  Env.size(~width=640, ~height=360, env);
   let birbs = Array.init(birbCount, _i => Birb.random(env));
   {birbs, selectedBirbIndex: Some(0)};
 };
