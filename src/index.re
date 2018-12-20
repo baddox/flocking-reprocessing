@@ -7,11 +7,6 @@ type stateT = {
   selectedBirbIndex: option(int),
 };
 
-let maxVel = 1.0;
-
-let updatePoint = (env, point) =>
-  point |> Body.update |> Body.wrap(env) |> Body.limitVel(maxVel);
-
 let setup = env => {
   Env.size(~width=600, ~height=600, env);
   let birbs = Array.init(birbCount, _i => Birb.random(env));
@@ -37,7 +32,8 @@ let draw = (state, env) => {
   };
   {
     ...state,
-    birbs: state.birbs |> Array.map(Birb.update(state.birbs, env)),
+    birbs:
+      state.birbs |> Array.map(birb => birb |> Birb.update(state.birbs, env)),
   };
 };
 
