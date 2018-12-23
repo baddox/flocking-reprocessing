@@ -31,3 +31,5 @@ let limitVel = (limit, body) => {
   ...body,
   vel: Vector.limitMag(limit, body.vel),
 };
+
+let minVel = (minV, body) => {...body, vel: Vector.minMag(minV, body.vel)};

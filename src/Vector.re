@@ -17,7 +17,7 @@ let fromPolar = (distance, angle) : t => {
 
 let add = (a: t, b: t) : t => create(a.x +. b.x, a.y +. b.y);
 
-let sub = (a: t, b: t) : t => create(a.x -. b.x, a.y -. b.y);
+let sub = ((a: t, b: t)) : t => create(a.x -. b.x, a.y -. b.y);
 
 let mult = (n: float, vec: t) : t => create(vec.x *. n, vec.y *. n);
 
@@ -32,7 +32,7 @@ let mag = (vec: t) => sqrt(magSq(vec));
 
 let heading = (vec: t) => atan2(vec.x, vec.y);
 
-let limit = (max: float, vec: t) : t => {
+let limit2 = (max: float, vec: t) : t => {
   let mSq = magSq(vec);
   if (mSq > max *. max) {
     vec |> div(sqrt(mSq)) |> mult(max);
@@ -51,6 +51,9 @@ let setMag = (n: float, vec: t) : t => vec |> normalize |> mult(n);
 let limitMag = (limit: float, vec: t) : t =>
   mag(vec) > limit ? setMag(limit, vec) : vec;
 
+let minMag = (minV: float, vec: t) : t =>
+  mag(vec) < minV ? setMag(minV, vec) : vec;
+
 let distance = (a: t, b: t) =>
   sqrt((a.x -. b.x) ** 2.0 +. (a.y -. b.y) ** 2.0);
 
@@ -60,13 +63,14 @@ let wrap = (env, vector) => {
   fromCoords(Util.wrap(vector.x, width), Util.wrap(vector.y, height));
 };
 
+let sum = List.fold_left(add, create(0.0, 0.0));
+
 let average = vectors => {
   let length = List.length(vectors);
   switch (length) {
   | 0 => create(0.0, 0.0)
   | _ =>
-    let sum = vectors |> List.fold_left(add, create(0.0, 0.0));
-    let average = div(float_of_int(length), sum);
+    let average = div(float_of_int(length), sum(vectors));
     average;
   };
 };
