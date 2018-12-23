@@ -4,7 +4,7 @@ let maxSpeed = 4.0;
 
 let minSpeed = 2.0;
 
-let maxForce = 0.1;
+let maxForce = 0.15;
 
 let neighborDistance = 50.0;
 
@@ -46,7 +46,7 @@ let getAlignment = (birb, neighbors) =>
     let averageVel =
       neighbors
       |> List.filter(neighbor =>
-           Vector.distance(birb.body.pos, neighbor.body.pos) < 25.0
+           Vector.distance(birb.body.pos, neighbor.body.pos) < 10.0
          )
       |> List.map(neighbor => neighbor.body.vel)
       |> Vector.average;
@@ -61,7 +61,7 @@ let getSeparation = (birb, neighbors) => {
     |> List.map(neighbor => {
          let distance =
            Vector.distance(birb.body.pos, neighbor.body.pos) +. 0.01;
-         if (distance < 10.0) {
+         if (distance < 35.0) {
            let awayFromNeighbor =
              Vector.sub((birb.body.pos, neighbor.body.pos));
            let desiredVel =
@@ -86,6 +86,17 @@ let getCohesion = (birb, neighbors) => {
   steering |> Vector.limitMag(maxForce *. 0.5);
 };
 
+let scl = 500.0;
+
+let getWind = (pos: Vector.t, zOff) : Vector.t => {
+  let xOff = pos.x /. scl;
+  let yOff = pos.y /. scl;
+  let zOff = zOff;
+  let angle =
+    Utils.noise(xOff, yOff, zOff *. 20.0 /. scl) *. Constants.two_pi;
+  Vector.fromPolar(maxForce, angle);
+};
+
 let update = (birbs, selectedBirb, env, birb) =>
   switch (selectedBirb) {
   | Some(b) =>
@@ -93,16 +104,15 @@ let update = (birbs, selectedBirb, env, birb) =>
     let alignment = getAlignment(birb, neighbors);
     let separation = getSeparation(birb, neighbors);
     let cohesion = getCohesion(birb, neighbors);
+    let wind = getWind(birb.body.pos, float_of_int(Env.frameCount(env)));
     let force =
       birb == b || true ?
         Vector.sum([
           Vector.create(0.0, 0.0),
-          /* alignment |> Vector.setMag(speed *. 1.0),
-             separation |> Vector.setMag(speed *. 1.0),
-             cohesion |> Vector.setMag(speed *. 1.0), */
           alignment,
           separation,
           cohesion,
+          wind,
         ])
         |> Vector.limitMag(maxForce) :
         Vector.create(0.0, 0.0);
@@ -144,6 +154,16 @@ let draw = (birb, ~hovered=false, ~selected=false, ~neighbor=false, env) => {
     env,
   );
   Draw.popMatrix(env);
+  /* let wind =
+       getWind(birb.body.pos, float_of_int(Env.frameCount(env)))
+       |> Vector.mult(100.0);
+     let toWind = Vector.add(birb.body.pos, wind);
+     Draw.linef(
+       ~p1=(birb.body.pos.x, birb.body.pos.y),
+       /* ~p2=(birb.body.pos.x +. 5.0, birb.body.pos.y +. 5.0), */
+       ~p2=(toWind.x, toWind.y),
+       env,
+     ); */
 };
 
 let drawCircle_ = (env, birb) => {

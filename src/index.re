@@ -1,6 +1,6 @@
 open Reprocessing;
 
-let birbCount = 200;
+let birbCount = 300;
 
 type stateT = {
   birbs: array(Birb.t),
@@ -13,7 +13,7 @@ let initialState = env => {
 };
 
 let setup = env => {
-  Env.size(~width=600, ~height=400, env);
+  Env.size(~width=800, ~height=600, env);
   initialState(env);
 };
 
